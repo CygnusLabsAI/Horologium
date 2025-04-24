@@ -10,4 +10,18 @@
 // add headers that you want to pre-compile here
 #include "framework.h"
 
+#include <atomic>
+#include <chrono>
+#include <filesystem>
+#include <fstream>
+#include <map>
+#include <queue>
+#include <stack>
+#include <stdexcept>
+#include <string>
+#include <thread>
+#include <unordered_map>
+#include <vector>
+
+
 #endif //PCH_H

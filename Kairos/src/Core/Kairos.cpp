@@ -3,6 +3,13 @@
 
 #include "framework.h"
 #include "Kairos.h"
+#include <Horologium.h>
+#include "..\..\..\Horologium\src\Core\pch.h"
+#include "..\..\..\Horologium\src\Core\Instrumentor.h"
+#include "..\..\..\Horologium\src\Utils\std_string_conversion.h"
+
+//extern "C" Horologium::Instrumentor;
+//extern "C" void Horologium::Instrumentor::BeginProfile(const std::thread::id&, const std::wstring&);
 
 #define MAX_LOADSTRING 100
 
@@ -17,6 +24,38 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+//extern "C" Horologium::Instrumentor instrumentor;
+Horologium::Instrumentor instrumentor;
+
+void third(void)
+{
+    instrumentor.BeginProfile(std::this_thread::get_id(), std::wstring(stows(__FUNCDNAME__)));
+    Sleep(30);
+    instrumentor.EndProfile(std::this_thread::get_id(), std::wstring(stows(__FUNCDNAME__)));
+}
+
+void second(void)
+{
+    instrumentor.BeginProfile(std::this_thread::get_id(), std::wstring(stows(__FUNCDNAME__)));
+    third();
+    Sleep(20);
+    third();
+    Sleep(20);
+    third();
+    Sleep(20);
+    instrumentor.EndProfile(std::this_thread::get_id(), std::wstring(stows(__FUNCDNAME__)));
+}
+
+void first(void)
+{
+    instrumentor.BeginProfile(std::this_thread::get_id(), std::wstring(stows(__FUNCDNAME__)));
+    Sleep(10);
+    second();
+    Sleep(10);
+    second();
+    instrumentor.EndProfile(std::this_thread::get_id(), std::wstring(stows(__FUNCDNAME__)));
+}
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -26,6 +65,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Place code here.
+    first();
+    instrumentor.saveData(L"test");
+
+    Horologium::Instrumentor loading;
+
+    loading.loadData(L"test.hid");
+    int debug = 0;
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
